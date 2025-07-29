@@ -37,7 +37,9 @@
     </div>
 
     <footer class="text-sm bg-neutral-900 text-neutral-50 p-4 font-semibold"> 
-      Simple Habit Tracker
+      Site by @<a href="https://jdcowf.github.io" class="underline">jdcowf</a> & Claude Sonnet 4
+    <br>
+    Icons by <a href="https://fontawesome.com" class="underline">Font Awesome</a>
     </footer>
   </main>
 
@@ -529,81 +531,6 @@
     document.getElementById('add-habit-btn').onclick = openAddHabitModal;
     document.getElementById('delete-mode-btn').onclick = toggleDeleteMode;
     document.getElementById('stats-btn').onclick = openStatsModal;
-
-    // Allow Enter key to add habit
-    document.getElementById('habitInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        addHabit();
-      }
-    });
-
-    // Initialize the app
-    updateDateDisplay();
-    renderHabits();
-  </script>`;
-        }
-        
-        habitsList.appendChild(habitElement);
-      });
-    }
-
-    function toggleDeleteMode() {
-      deleteMode = !deleteMode;
-      const deleteBtn = document.getElementById('delete-mode-btn');
-      
-      if (deleteMode) {
-        deleteBtn.textContent = 'Cancel Delete';
-        deleteBtn.className = 'bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2 rounded font-semibold';
-      } else {
-        deleteBtn.innerHTML = '<i class="fa-sharp fa-solid fa-trash"></i> Delete Mode';
-        deleteBtn.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-semibold';
-      }
-      
-      renderHabits();
-    }
-
-    function openAddHabitModal() {
-      document.getElementById('addHabitModal').classList.remove('hidden');
-      document.getElementById('habitInput').focus();
-    }
-
-    function closeAddHabitModal() {
-      document.getElementById('addHabitModal').classList.add('hidden');
-      document.getElementById('habitInput').value = '';
-    }
-
-    function addHabit() {
-      const habitName = document.getElementById('habitInput').value.trim();
-      
-      if (!habitName) {
-        alert('Please enter a habit name.');
-        return;
-      }
-      
-      const allHabits = getAllUniqueHabits();
-      if (allHabits.includes(habitName)) {
-        alert('This habit already exists.');
-        return;
-      }
-      
-      // Initialize the habit with 0 for today
-      const data = getHabitsData();
-      const today = getTodayString();
-      
-      if (!data[today]) {
-        data[today] = {};
-      }
-      
-      data[today][habitName] = 0;
-      saveHabitsData(data);
-      
-      closeAddHabitModal();
-      renderHabits();
-    }
-
-    // Event listeners
-    document.getElementById('add-habit-btn').onclick = openAddHabitModal;
-    document.getElementById('delete-mode-btn').onclick = toggleDeleteMode;
 
     // Allow Enter key to add habit
     document.getElementById('habitInput').addEventListener('keypress', function(e) {
