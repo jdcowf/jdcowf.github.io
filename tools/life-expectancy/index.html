@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Life in Weeks</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #fff;
+      color: #000;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 10px);
+      gap: 2px;
+      max-width: 800px;
+    }
+
+    .week {
+      width: 10px;
+      height: 10px;
+      background-color: #ccc;
+    }
+
+    .week.lived {
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Life in Weeks</h1>
+  <div id="grid" class="grid"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const storedBirthday = localStorage.getItem('birthday');
+    const storedExpectancy = localStorage.getItem('expectancy');
+
+    let birthday = params.get('birthday') || storedBirthday;
+    let expectancy = parseInt(params.get('expectancy')) || parseInt(storedExpectancy) || 80;
+
+    async function promptForData() {
+      birthday = prompt("Enter your birthdate (YYYY-MM-DD):", "1990-01-01");
+      expectancy = parseInt(prompt("Enter your life expectancy (years):", "80"), 10) || 80;
+      localStorage.setItem('birthday', birthday);
+      localStorage.setItem('expectancy', expectancy);
+    }
+
+    (async function init() {
+      if (!birthday || !expectancy) {
+        await promptForData();
+      }
+
+      const birthDate = new Date(birthday);
+      const now = new Date();
+      const weeksLived = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24 * 7));
+      const totalWeeks = expectancy * 52;
+
+      const grid = document.getElementById('grid');
+      for (let i = 0; i < totalWeeks; i++) {
+        const week = document.createElement('div');
+        week.classList.add('week');
+        if (i < weeksLived) week.classList.add('lived');
+        grid.appendChild(week);
+      }
+    })();
+  </script>
+</body>
+</html>
