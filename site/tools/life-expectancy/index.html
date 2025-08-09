@@ -2,70 +2,353 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Life in Weeks</title>
+  <title>LIFE IN WEEKS</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
+      font-family: 'JetBrains Mono', monospace;
+      background: #1a1a1a;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: auto;
+    }
+
+    .container {
+      padding: 3rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      border: 4px solid #ffffff;
+      background: #000000;
       padding: 2rem;
-      background: #fff;
-      color: #000;
+      margin-bottom: 3rem;
+      box-shadow: 8px 8px 0px #ffffff;
+      transform: rotate(-0.5deg);
+    }
+
+    h1 {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      line-height: 0.9;
+      text-shadow: 3px 3px 0px #ff0000;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      color: #000000;
+      padding: 1.5rem;
+      border: 3px solid #000000;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      box-shadow: 6px 6px 0px #ff0000;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .grid-container {
+      background: #000000;
+      border: 6px solid #ffffff;
+      padding: 2rem;
+      box-shadow: 12px 12px 0px #ff0000;
+    }
+
+    .grid-header {
+      color: #ffffff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 10px);
+      grid-template-columns: repeat(52, 1fr);
       gap: 2px;
-      max-width: 800px;
+      max-width: 100%;
+      aspect-ratio: 52/80;
     }
 
     .week {
-      width: 10px;
-      height: 10px;
-      background-color: #ccc;
+      aspect-ratio: 1;
+      background-color: #333333;
+      border: 1px solid #555555;
+      transition: all 0.1s ease;
     }
 
     .week.lived {
-      background-color: #000;
+      background-color: #ffffff;
+      border-color: #ffffff;
+      box-shadow: inset 0 0 0 1px #000000;
+    }
+
+    .week.current {
+      background-color: #ff0000;
+      border-color: #ff0000;
+      animation: pulse 1s infinite alternate;
+    }
+
+    .week:hover {
+      transform: scale(1.5);
+      z-index: 10;
+      position: relative;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .controls {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #ff0000;
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      padding: 1rem 2rem;
+      font-family: inherit;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 4px 4px 0px #000000;
+    }
+
+    .btn:hover {
+      background: #ffffff;
+      color: #000000;
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #000000;
+    }
+
+    .legend {
+      margin-top: 2rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+    }
+
+    .legend-box.future { background: #333333; }
+    .legend-box.lived { background: #ffffff; }
+    .legend-box.current { background: #ff0000; }
+
+    @media (max-width: 768px) {
+      .header {
+        transform: none;
+        margin-bottom: 2rem;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(26, 1fr);
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Life in Weeks</h1>
-  <div id="grid" class="grid"></div>
+  <div class="container">
+    <div class="header">
+      <h1>LIFE IN WEEKS</h1>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="grid-container">
+      <div class="grid-header">YOUR EXISTENCE MAPPED</div>
+      <div id="grid" class="grid"></div>
+      
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-box future"></div>
+          <span>Future</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box lived"></div>
+          <span>Lived</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box current"></div>
+          <span>Current</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="resetData()">Reset Data</button>
+      <button class="btn" onclick="exportImage()">Export Image</button>
+    </div>
+  </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const storedBirthday = localStorage.getItem('birthday');
-    const storedExpectancy = localStorage.getItem('expectancy');
-
-    let birthday = params.get('birthday') || storedBirthday;
-    let expectancy = parseInt(params.get('expectancy')) || parseInt(storedExpectancy) || 80;
+    let birthday, expectancy, birthDate, now, weeksLived, totalWeeks;
 
     async function promptForData() {
-      birthday = prompt("Enter your birthdate (YYYY-MM-DD):", "1990-01-01");
-      expectancy = parseInt(prompt("Enter your life expectancy (years):", "80"), 10) || 80;
-      localStorage.setItem('birthday', birthday);
-      localStorage.setItem('expectancy', expectancy);
+      birthday = prompt("ENTER YOUR BIRTHDATE (YYYY-MM-DD):", "1990-01-01");
+      if (!birthday) return false;
+      
+      expectancy = parseInt(prompt("ENTER YOUR LIFE EXPECTANCY (YEARS):", "80"), 10) || 80;
+      
+      // Store in memory instead of localStorage
+      return true;
     }
 
-    (async function init() {
-      if (!birthday || !expectancy) {
-        await promptForData();
-      }
+    function calculateStats() {
+      birthDate = new Date(birthday);
+      now = new Date();
+      weeksLived = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24 * 7));
+      totalWeeks = expectancy * 52;
+    }
 
-      const birthDate = new Date(birthday);
-      const now = new Date();
-      const weeksLived = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24 * 7));
-      const totalWeeks = expectancy * 52;
+    function updateStats() {
+      const percentage = ((weeksLived / totalWeeks) * 100).toFixed(1);
+      const weeksRemaining = totalWeeks - weeksLived;
+      const yearsLived = (weeksLived / 52).toFixed(1);
+      const yearsRemaining = (weeksRemaining / 52).toFixed(1);
 
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <span class="stat-number">${weeksLived}</span>
+          <div>Weeks Lived</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">${weeksRemaining}</span>
+          <div>Weeks Remaining</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">${percentage}%</span>
+          <div>Life Completed</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">${yearsLived}</span>
+          <div>Years Lived</div>
+        </div>
+      `;
+    }
+
+    function renderGrid() {
       const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      
       for (let i = 0; i < totalWeeks; i++) {
         const week = document.createElement('div');
         week.classList.add('week');
-        if (i < weeksLived) week.classList.add('lived');
+        
+        if (i < weeksLived) {
+          week.classList.add('lived');
+        } else if (i === weeksLived) {
+          week.classList.add('current');
+        }
+        
+        // Add hover tooltip
+        const year = Math.floor(i / 52) + 1;
+        const weekInYear = (i % 52) + 1;
+        week.title = `Year ${year}, Week ${weekInYear}`;
+        
         grid.appendChild(week);
       }
-    })();
+    }
+
+    function resetData() {
+      if (promptForData()) {
+        init();
+      }
+    }
+
+    function exportImage() {
+      // Simple export functionality
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1040;
+      canvas.height = 1600;
+      
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const weekSize = 20;
+      const gap = 2;
+      
+      for (let i = 0; i < totalWeeks; i++) {
+        const x = (i % 52) * (weekSize + gap);
+        const y = Math.floor(i / 52) * (weekSize + gap);
+        
+        if (i < weeksLived) {
+          ctx.fillStyle = '#ffffff';
+        } else if (i === weeksLived) {
+          ctx.fillStyle = '#ff0000';
+        } else {
+          ctx.fillStyle = '#333333';
+        }
+        
+        ctx.fillRect(x, y, weekSize, weekSize);
+      }
+      
+      const link = document.createElement('a');
+      link.download = 'life-in-weeks.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    async function init() {
+      if (!birthday) {
+        const success = await promptForData();
+        if (!success) return;
+      }
+      
+      calculateStats();
+      updateStats();
+      renderGrid();
+    }
+
+    // Initialize
+    init();
   </script>
 </body>
 </html>
