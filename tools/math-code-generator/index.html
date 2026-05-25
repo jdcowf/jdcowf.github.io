@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Message Puzzle Maker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, serif;
+  background: #e8e8e8;
+  color: #000;
+}
+
+/* ── Input UI ── */
+.input-section {
+  max-width: 660px;
+  margin: 2.5rem auto;
+  background: #fff;
+  border: 1px solid #bbb;
+  padding: 2rem;
+}
+
+.input-section h1 {
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.input-section p {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+textarea {
+  flex: 1;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  border: 1px solid #999;
+  padding: 0.5rem 0.6rem;
+  resize: vertical;
+  min-height: 70px;
+}
+
+textarea:focus { outline: 2px solid #000; outline-offset: 1px; }
+
+.btn {
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover { background: #333; }
+.btn:active { background: #555; }
+
+.btn-outline {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.btn-outline:hover { background: #f0f0f0; }
+
+.hint { font-size: 0.8rem; color: #666; font-style: italic; }
+
+/* ── Worksheet wrapper (screen only) ── */
+.worksheet-wrapper {
+  max-width: 820px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.controls span { font-size: 0.8rem; color: #666; font-style: italic; }
+
+/* ── Worksheet (the printable part) ── */
+.worksheet {
+  background: #fff;
+  border: 1px solid #bbb;
+  padding: 1.5rem 2rem 1rem;
+}
+
+/* header */
+.ws-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 2px solid #000;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.ws-instructions {
+  font-size: 0.8rem;
+  text-align: center;
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* ── Puzzle area ── */
+.message-display {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  row-gap: 0;
+  margin-bottom: 1rem;
+}
+
+.word-group {
+  display: flex;
+  gap: 2px;
+  margin-right: 0.75rem;
+  margin-bottom: 1.5rem;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.letter-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+}
+
+.blank {
+  width: 30px;
+  border-bottom: 2px solid #000;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.math-problem {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.62rem;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+.passthrough-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 16px;
+  padding-bottom: 4px;
+}
+
+.passthrough-char {
+  font-size: 0.85rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.line-break {
+  width: 100%;
+  height: 1.5rem;
+}
+
+/* ── Cipher key ── */
+.cipher-section {
+  border-top: 2px solid #000;
+  padding-top: 0.8rem;
+}
+
+.cipher-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.cipher-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  border: 1px solid #000;
+  border-right: none;
+  border-bottom: none;
+}
+
+.cipher-cell {
+  text-align: center;
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+  padding: 3px 2px;
+}
+
+.cipher-letter {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.78rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.cipher-num {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  color: #444;
+  line-height: 1.2;
+}
+
+/* ── Utilities ── */
+.hidden { display: none; }
+
+/* ── Print ── */
+@media print {
+  body { background: #fff; }
+  .input-section,
+  .controls { display: none !important; }
+
+  .worksheet-wrapper {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+
+  .worksheet {
+    border: none;
+    padding: 0.5rem 1rem 1rem;
+  }
+
+  /* Cipher at bottom of content, not fixed */
+  .cipher-section {
+    position: relative;
+    margin-top: 2rem;
+    padding: 0.8rem 1rem 0.5rem;
+    border-top: 2px solid #000;
+  }
+
+  .word-group {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .message-display {
+    page-break-before: auto;
+  }
+}
+
+@page {
+  margin: 0.5in;
+}
+</style>
+</head>
+<body>
+
+<!-- ── INPUT SECTION ── -->
+<div class="input-section" id="inputSection">
+  <h1>Math Message Puzzle Maker</h1>
+  <p>Type a secret message. Each letter becomes a math problem — solvers use the cipher key (A=1, B=2…) to figure out which letter each answer represents, then fill in the blanks to reveal the hidden message.</p>
+  <div class="input-row">
+    <textarea id="messageInput" placeholder="Type your secret message here…" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    <button class="btn" onclick="generatePuzzle()">Generate</button>
+  </div>
+  <div class="input-row">
+    <label style="font-weight: normal; font-size: 0.875rem; margin-right: 15px;">
+      <input type="checkbox" id="useAddition" checked style="margin-right: 8px;">
+      Addition (+)
+    </label>
+    <label style="font-weight: normal; font-size: 0.875rem; margin-right: 15px;">
+      <input type="checkbox" id="useSubtraction" checked style="margin-right: 8px;">
+      Subtraction (−)
+    </label>
+    <label style="font-weight: normal; font-size: 0.875rem; margin-right: 15px;">
+      <input type="checkbox" id="useMultiplication" checked style="margin-right: 8px;">
+      Multiplication (×)
+    </label>
+    <label style="font-weight: normal; font-size: 0.875rem; margin-right: 15px;">
+      <input type="checkbox" id="useDivision" checked style="margin-right: 8px;">
+      Division (÷)
+    </label>
+  </div>
+  <div class="input-row">
+    <label style="font-weight: normal; font-size: 0.875rem;">
+      <input type="checkbox" id="limitDivision" checked style="margin-right: 8px;">
+      Limit division problems to max result of 10
+    </label>
+  </div>
+  <p class="hint">Letters A–Z only. Spaces and punctuation are passed through as-is. Problems use +, −, ×, ÷ with at least one single-digit number in each.</p>
+</div>
+
+<!-- ── WORKSHEET SECTION ── -->
+<div class="worksheet-wrapper hidden" id="worksheetWrapper">
+  <div class="controls">
+    <button class="btn" onclick="window.print()">Print Worksheet</button>
+    <button class="btn btn-outline" onclick="generatePuzzle()">Regenerate Problems</button>
+    <span>Regenerate shuffles new math problems for the same message.</span>
+  </div>
+
+  <div class="worksheet" id="worksheet">
+
+    <div class="ws-title">Math Message Decoder</div>
+    <div class="ws-instructions">Solve each math problem. Use the key at the bottom to find the letter. Write the letter in the blank above.</div>
+
+    <div class="message-display" id="messageDisplay"></div>
+
+    <div class="cipher-section" id="cipherSection">
+      <div class="cipher-title">Cipher Key</div>
+      <div class="cipher-grid" id="cipherGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Utilities ── */
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── Math problem generation ── */
+// n = letter value 1–26
+// Rules: one operand always single digit (1–9); other is 1–2 digits (1–99); both positive integers.
+
+function tryAdd(n) {
+  // a + b = n; b is single digit 1–9; a = n−b must be ≥ 1
+  if (n < 2) return null;
+  const b = randInt(1, Math.min(n - 1, 9)); // b: 1–9 ✓; a: 1–25 ✓
+  return `${n - b} + ${b}`;
+}
+
+function trySub(n) {
+  // a − b = n; b is single digit 1–9; a = n+b is 2–35 ✓
+  const b = randInt(1, 9);
+  return `${n + b} \u2212 ${b}`;
+}
+
+function tryMul(n) {
+  // a × b = n; b is single digit 2–9 and a factor of n; a = n/b is 1–13 ✓
+  const opts = [];
+  for (let b = 2; b <= 9; b++) {
+    if (n % b === 0) opts.push(b);
+  }
+  if (!opts.length) return null;
+  const b = opts[randInt(0, opts.length - 1)];
+  const a = n / b;
+  return Math.random() < 0.5 ? `${a} \u00d7 ${b}` : `${b} \u00d7 ${a}`;
+}
+
+function tryDiv(n, limitDivision) {
+  // a ÷ b = n; b is single digit 2–9; a = n*b must be ≤ 99
+  // For n=26 the max b is floor(99/26)=3, so b range is always valid for n≤26.
+  if (limitDivision && n > 10) return null;
+  const maxB = Math.min(9, Math.floor(99 / n));
+  if (maxB < 2) return null;
+  const b = randInt(2, maxB); // b: 2–9 ✓; a = n*b: 2–99 ✓
+  return `${n * b} \u00f7 ${b}`;
+}
+
+function generateProblem(n, limitDivision, useAddition, useSubtraction, useMultiplication, useDivision) {
+  const ops = [];
+  if (useAddition) ops.push(tryAdd);
+  if (useSubtraction) ops.push(trySub);
+  if (useMultiplication) ops.push(tryMul);
+  if (useDivision) ops.push((n) => tryDiv(n, limitDivision));
+  
+  const shuffledOps = shuffle(ops);
+  for (const op of shuffledOps) {
+    const result = op(n);
+    if (result) return result;
+  }
+  // Guaranteed fallback: subtraction always works
+  return `${n + 3} \u2212 3`;
+}
+
+/* ── Cipher key ── */
+function buildCipherKey() {
+  const grid = document.getElementById('cipherGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 26; i++) {
+    const letter = String.fromCharCode(64 + i);
+    const cell = document.createElement('div');
+    cell.className = 'cipher-cell';
+    cell.innerHTML =
+      `<div class="cipher-letter">${letter}</div>` +
+      `<div class="cipher-num">${i}</div>`;
+    grid.appendChild(cell);
+  }
+}
+
+/* ── Main generator ── */
+function generatePuzzle() {
+  const raw = document.getElementById('messageInput').value;
+  if (!raw.trim()) return;
+  const input = raw.toUpperCase();
+
+  const limitDivision = document.getElementById('limitDivision').checked;
+  const useAddition = document.getElementById('useAddition').checked;
+  const useSubtraction = document.getElementById('useSubtraction').checked;
+  const useMultiplication = document.getElementById('useMultiplication').checked;
+  const useDivision = document.getElementById('useDivision').checked;
+
+  const display = document.getElementById('messageDisplay');
+  display.innerHTML = '';
+
+  // Split on newlines first, then spaces to preserve line breaks
+  const lines = input.split('\n');
+
+  lines.forEach((line, lineIndex) => {
+    if (!line.trim()) {
+      // Empty line - add a line break
+      const lineBreak = document.createElement('div');
+      lineBreak.className = 'line-break';
+      display.appendChild(lineBreak);
+      return;
+    }
+
+    // Split on spaces to form word groups; preserve punctuation inside words
+    const words = line.split(' ');
+
+    words.forEach((word) => {
+      if (!word) return;
+
+      const wg = document.createElement('div');
+      wg.className = 'word-group';
+
+      for (const ch of word) {
+        const code = ch.charCodeAt(0);
+
+        if (code >= 65 && code <= 90) {
+          // Letter → blank + math problem
+          const n = code - 64; // A=1 … Z=26
+          const cell = document.createElement('div');
+          cell.className = 'letter-cell';
+          cell.innerHTML =
+            `<div class="blank"></div>` +
+            `<div class="math-problem">${generateProblem(n, limitDivision, useAddition, useSubtraction, useMultiplication, useDivision)}</div>`;
+          wg.appendChild(cell);
+        } else {
+          // Non-letter → pass through as-is
+          const cell = document.createElement('div');
+          cell.className = 'passthrough-cell';
+          cell.innerHTML = `<div class="passthrough-char">${ch}</div>`;
+          wg.appendChild(cell);
+        }
+      }
+
+      display.appendChild(wg);
+    });
+
+    // Add line break after each line (except the last)
+    if (lineIndex < lines.length - 1) {
+      const lineBreak = document.createElement('div');
+      lineBreak.className = 'line-break';
+      display.appendChild(lineBreak);
+    }
+  });
+
+  buildCipherKey();
+
+  const wrapper = document.getElementById('worksheetWrapper');
+  wrapper.classList.remove('hidden');
+  wrapper.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ── Enter key shortcut ── */
+document.getElementById('messageInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    generatePuzzle();
+  }
+});
+</script>
+</body>
+</html>
